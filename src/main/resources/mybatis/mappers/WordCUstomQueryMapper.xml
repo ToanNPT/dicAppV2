@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.education.vndictionary.mybatisQuery.WordCustomQueryMapper">
+    <resultMap id="WordResult" type="WordDto">
+        <result column="id" property="id"/>
+        <result column="key_work" property="keyWork"/>
+        <result column="description" property="description"/>
+        <result column="voice_url" property="voiceUrl"/>
+        <result column="topic_id" property="topicId"/>
+        <result column="topic_name" property="topicName"/>
+        <result column="sec" property="sec"/>
+        <result column="is_hidden" property="isHidden"/>
+        <result column="word_type" property="wordType"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="searchWords" resultMap="WordResult">
+        SELECT
+        w.id
+        , w.key_work
+        , w.voice_url
+        , w.topic_id
+        , t.topic_name
+        , w.sec
+        , w.is_hidden
+        ,w.update_time
+        ,(select STRING_AGG(wd.word_type, ', ') from word_descr wd where wd.word_id = w.id AND wd.is_hidden = false) as word_type
+        FROM words w
+        INNER JOIN topics t ON w.topic_id = t.id
+        WHERE w.is_hidden = false
+        <if test="keyWord != '' and keyWord != null ">
+            AND LOWER(w.key_work) LIKE CONCAT('%', #{keyWord}, '%')
+        </if>
+
+        <if test="topicId != null and topicId != -1">
+            AND w.topic_id = #{topicId}
+        </if>
+
+        <choose>
+            <when test="dateOrder = 'desc' ">
+                ORDER BY w.update_time DESC
+            </when>
+            <otherwise>
+                ORDER BY w.update_time ASC
+            </otherwise>
+        </choose>
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countSearchWords" >
+        SELECT COUNT(w.id)
+        FROM words w
+        INNER JOIN topics t ON w.topic_id = t.id
+        WHERE w.is_hidden = false
+        <if test="keyWord != '' ">
+            AND w.key_work LIKE CONCAT('%', #{keyWord}, '%')
+        </if>
+
+        <if test="topicId != null ">
+            AND w.topic_id = #{topicId}
+        </if>
+
+    </select>
+
+
+
+</mapper>
