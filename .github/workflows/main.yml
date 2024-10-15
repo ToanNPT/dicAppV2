@@ -26,11 +26,10 @@ jobs:
 
     - name: Build Spring Boot JAR
       run: |
-        cd springboot-app
         mvn clean package -DskipTests
 
     - name: Build Next.js App
       run: |
-        cd nextjs-app
+        cd dictionary-app
         npm install
         npm run build
