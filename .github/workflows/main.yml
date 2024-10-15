@@ -1,0 +1,36 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17 for Spring Boot
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Set up Node.js 18 for Next.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Build Spring Boot JAR
+      run: |
+        cd springboot-app
+        mvn clean package -DskipTests
+
+    - name: Build Next.js App
+      run: |
+        cd nextjs-app
+        npm install
+        npm run build
